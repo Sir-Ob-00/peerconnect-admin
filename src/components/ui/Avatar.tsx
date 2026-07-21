@@ -1,7 +1,7 @@
-import React from 'react';
+import type { HTMLAttributes } from 'react';
 import { cn } from '../../utils/cn';
 
-interface AvatarProps extends React.HTMLAttributes<HTMLDivElement> {
+interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
   src?: string;
   fallback: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';

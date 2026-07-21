@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Calendar, Ban } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Calendar, Ban, Clock, CheckCircle, XCircle, CalendarRange } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import { StatCard } from '../components/ui/StatCard';
+import { Skeleton } from '../components/ui/LoadingSkeleton';
 import { FilterDropdown } from '../components/ui/FilterDropdown';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -10,7 +12,7 @@ import { TableSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { ConfirmationModal } from '../components/ui/Modal';
-import { MOCK_SESSIONS } from '../data/mock';
+import { MOCK_SESSIONS, MOCK_SESSION_STATS } from '../data/mock';
 import toast from 'react-hot-toast';
 
 export default function Sessions() {
@@ -45,7 +47,20 @@ export default function Sessions() {
           <p className="text-slate-500 mt-1">Monitor and manage all skill-sharing sessions.</p>
         </div>
       </div>
-      
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+        ) : (
+          <>
+            <StatCard title={MOCK_SESSION_STATS.total.label} value={MOCK_SESSION_STATS.total.value.toLocaleString()} icon={CalendarRange} />
+            <StatCard title={MOCK_SESSION_STATS.pending.label} value={MOCK_SESSION_STATS.pending.value.toLocaleString()} icon={Clock} />
+            <StatCard title={MOCK_SESSION_STATS.completed.label} value={MOCK_SESSION_STATS.completed.value.toLocaleString()} icon={CheckCircle} />
+            <StatCard title={MOCK_SESSION_STATS.cancelled.label} value={MOCK_SESSION_STATS.cancelled.value.toLocaleString()} icon={XCircle} />
+          </>
+        )}
+      </div>
+
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative w-full sm:max-w-xs">

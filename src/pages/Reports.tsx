@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MessageSquare, Check, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, MessageSquare, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
+import { StatCard } from '../components/ui/StatCard';
+import { Skeleton } from '../components/ui/LoadingSkeleton';
 import { FilterDropdown } from '../components/ui/FilterDropdown';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
 import { StatusBadge } from '../components/ui/StatusBadge';
@@ -10,7 +12,7 @@ import { TableSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
-import { MOCK_REPORTS } from '../data/mock';
+import { MOCK_REPORTS, MOCK_REPORT_STATS } from '../data/mock';
 import toast from 'react-hot-toast';
 
 export default function Reports() {
@@ -51,7 +53,18 @@ export default function Reports() {
           <p className="text-slate-500 mt-1">Review and manage reported users and content.</p>
         </div>
       </div>
-      
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {loading ? (
+          Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
+        ) : (
+          <>
+            <StatCard title={MOCK_REPORT_STATS.pending.label} value={MOCK_REPORT_STATS.pending.value} icon={AlertTriangle} />
+            <StatCard title={MOCK_REPORT_STATS.resolved.label} value={MOCK_REPORT_STATS.resolved.value} icon={CheckCircle} />
+          </>
+        )}
+      </div>
+
       <Card className="overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between">
           <div className="relative w-full sm:max-w-xs">

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Filter, ChevronDown, Check } from 'lucide-react';
 import { Button } from './Button';
 import { cn } from '../../utils/cn';

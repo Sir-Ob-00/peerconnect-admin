@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Search, MoreVertical, ShieldAlert, CheckCircle, Trash2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Trash2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';

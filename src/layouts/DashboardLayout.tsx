@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, UserCheck, Calendar, 
-  MessageSquare, Star, LogOut, Menu, X 
+  MessageSquare, Star, LogOut, Menu
 } from 'lucide-react';
 import { cn } from '../utils/cn';
 

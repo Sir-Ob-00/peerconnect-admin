@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { UserCheck, Check, X, Search, FileText } from 'lucide-react';
+import { useState } from 'react';
+import { UserCheck, Check, X, FileText } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
