@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, Users, UserCheck, Calendar, 
   MessageSquare, Star, LogOut, Menu
 } from 'lucide-react';
 import { cn } from '../utils/cn';
+import { useCurrentAdmin, useLogout } from '../hooks/useAuth';
+import { clearTokens } from '../services/api';
 
 const navItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
@@ -18,10 +20,37 @@ const navItems = [
 export default function DashboardLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  const { data: admin, isLoading, error } = useCurrentAdmin();
+  const logout = useLogout();
+
+  useEffect(() => {
+    if (!localStorage.getItem('accessToken')) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  useEffect(() => {
+    if (error) {
+      clearTokens();
+      navigate('/login');
+    }
+  }, [error, navigate]);
 
   const handleLogout = () => {
-    navigate('/login');
+    logout.mutate();
   };
+
+  if (isLoading && localStorage.getItem('accessToken')) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-slate-50">
+        <div className="text-slate-500">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!admin) {
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -92,11 +121,13 @@ export default function DashboardLayout() {
           
           <div className="flex-1 flex justify-end items-center gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold">
-                A
+                <div className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold">
+                  {(admin.firstName?.[0] || 'A').toUpperCase()}
+                </div>
+                <span className="text-sm font-medium text-slate-700 hidden sm:block">
+                  {admin.firstName} {admin.lastName}
+                </span>
               </div>
-              <span className="text-sm font-medium text-slate-700 hidden sm:block">Admin User</span>
-            </div>
           </div>
         </header>
 

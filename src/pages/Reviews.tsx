@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Search, Star, Trash2 } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
@@ -8,25 +8,43 @@ import { TableSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
 import { ConfirmationModal } from '../components/ui/Modal';
-import { MOCK_REVIEWS } from '../data/mock';
 import toast from 'react-hot-toast';
+import { useReviews } from '../hooks/useReviews';
+import type { ReviewListItem } from '../types/api';
+
+type Review = {
+  id: string;
+  reviewer: string;
+  recipient: string;
+  rating: number;
+  comment: string;
+  date: string;
+};
 
 export default function Reviews() {
-  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: string | null }>({ isOpen: false, id: null });
-  
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [search, page]);
 
-  const filteredData = MOCK_REVIEWS.filter((r) => {
-    const matchSearch = r.reviewer.toLowerCase().includes(search.toLowerCase()) || r.recipient.toLowerCase().includes(search.toLowerCase()) || r.comment.toLowerCase().includes(search.toLowerCase());
+  const { data, isLoading, error, refetch } = useReviews({});
+
+  const reviews: Review[] = (data?.data || []).map((r: ReviewListItem) => ({
+    id: r.id,
+    reviewer: `${r.reviewer.firstName} ${r.reviewer.lastName}`,
+    recipient: r.receiverId,
+    rating: r.rating,
+    comment: r.comment,
+    date: r.createdAt,
+  }));
+
+  const filteredData = reviews.filter((r) => {
+    const matchSearch =
+      r.reviewer.toLowerCase().includes(search.toLowerCase()) ||
+      r.comment.toLowerCase().includes(search.toLowerCase());
     return matchSearch;
   });
+
+  const totalPages = data?.pagination.totalPages || 1;
 
   const handleDelete = () => {
     toast.success('Review deleted successfully.');
@@ -41,7 +59,7 @@ export default function Reviews() {
         ))}
       </div>
     );
-  }
+  };
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
@@ -51,66 +69,78 @@ export default function Reviews() {
           <p className="text-slate-500 mt-1">Monitor feedback and reviews left by students.</p>
         </div>
       </div>
-      
-      <Card className="overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-white flex items-center justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input 
-              placeholder="Search reviews..." 
-              className="pl-9 bg-slate-50 border-slate-200"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            />
+
+      {error ? (
+        <Card className="p-12">
+          <EmptyState
+            icon={Star}
+            title="Unable to load reviews"
+            description={error instanceof Error ? error.message : 'Unable to load reviews. Please try again.'}
+            actionText="Retry"
+            onAction={() => refetch()}
+          />
+        </Card>
+      ) : (
+        <Card className="overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-white flex items-center justify-between">
+            <div className="relative w-full sm:max-w-xs">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+              <Input
+                placeholder="Search reviews..."
+                className="pl-9 bg-slate-50 border-slate-200"
+                value={search}
+                onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+              />
+            </div>
           </div>
-        </div>
-        
-        <div className="bg-white">
-          {loading ? (
-            <div className="p-6"><TableSkeleton rows={5} /></div>
-          ) : filteredData.length === 0 ? (
-            <EmptyState 
-              icon={Star} 
-              title="No reviews found" 
-              description="There are no reviews matching your search."
-            />
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50/50">
-                    <TableHead>Reviewer</TableHead>
-                    <TableHead>Recipient</TableHead>
-                    <TableHead>Rating</TableHead>
-                    <TableHead>Comment</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-medium text-slate-900">{r.reviewer}</TableCell>
-                      <TableCell className="font-medium text-slate-900">{r.recipient}</TableCell>
-                      <TableCell>{renderStars(r.rating)}</TableCell>
-                      <TableCell className="text-slate-600 max-w-xs truncate">{r.comment}</TableCell>
-                      <TableCell className="text-slate-600">{new Date(r.date).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 px-2" onClick={() => setDeleteModal({ isOpen: true, id: r.id })}>
-                          <Trash2 className="w-4 h-4 mr-1" /> Delete
-                        </Button>
-                      </TableCell>
+
+          <div className="bg-white">
+            {isLoading ? (
+              <div className="p-6"><TableSkeleton rows={5} /></div>
+            ) : filteredData.length === 0 ? (
+              <EmptyState
+                icon={Star}
+                title="No reviews found"
+                description="There are no reviews matching your search."
+              />
+            ) : (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow className="bg-slate-50/50">
+                      <TableHead>Reviewer</TableHead>
+                      <TableHead>Recipient</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Comment</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <div className="border-t border-slate-100 bg-white">
-                <Pagination currentPage={page} totalPages={Math.ceil(filteredData.length / 10)} onPageChange={setPage} />
-              </div>
-            </>
-          )}
-        </div>
-      </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredData.map((r) => (
+                      <TableRow key={r.id}>
+                        <TableCell className="font-medium text-slate-900">{r.reviewer}</TableCell>
+                        <TableCell className="font-medium text-slate-900 text-slate-500">{r.recipient}</TableCell>
+                        <TableCell>{renderStars(r.rating)}</TableCell>
+                        <TableCell className="text-slate-600 max-w-xs truncate">{r.comment}</TableCell>
+                        <TableCell className="text-slate-600">{new Date(r.date).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700 hover:bg-red-50 px-2" onClick={() => setDeleteModal({ isOpen: true, id: r.id })}>
+                            <Trash2 className="w-4 h-4 mr-1" /> Delete
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <div className="border-t border-slate-100 bg-white">
+                  <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+                </div>
+              </>
+            )}
+          </div>
+        </Card>
+      )}
 
       <ConfirmationModal
         isOpen={deleteModal.isOpen}

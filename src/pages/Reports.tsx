@@ -1,180 +1,103 @@
-import { useState, useEffect } from 'react';
-import { Search, MessageSquare, AlertTriangle, CheckCircle } from 'lucide-react';
+import { useStats } from '../hooks/useStats';
+import { Users, Calendar, MessageSquare, UserCheck, ArrowUpRight } from 'lucide-react';
 import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
 import { StatCard } from '../components/ui/StatCard';
 import { Skeleton } from '../components/ui/LoadingSkeleton';
-import { FilterDropdown } from '../components/ui/FilterDropdown';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
-import { StatusBadge } from '../components/ui/StatusBadge';
-import { Pagination } from '../components/ui/Pagination';
-import { TableSkeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
 import { Button } from '../components/ui/Button';
-import { Modal } from '../components/ui/Modal';
-import { MOCK_REPORTS, MOCK_REPORT_STATS } from '../data/mock';
-import toast from 'react-hot-toast';
 
 export default function Reports() {
-  const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState('');
-  const [page, setPage] = useState(1);
-  const [selectedReport, setSelectedReport] = useState<any>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  
-  useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, [search, statusFilter, page]);
+  const { data: stats, isLoading, error, refetch } = useStats();
 
-  const filteredData = MOCK_REPORTS.filter((r) => {
-    const matchSearch = r.reporter.toLowerCase().includes(search.toLowerCase()) || r.reportedUser.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter ? r.status === statusFilter : true;
-    return matchSearch && matchStatus;
-  });
-
-  const handleAction = (action: 'resolve' | 'dismiss') => {
-    toast.success(`Report ${action}d successfully.`);
-    setModalOpen(false);
-  };
-
-  const openDetails = (report: any) => {
-    setSelectedReport(report);
-    setModalOpen(true);
-  };
+  if (error) {
+    return (
+      <div className="space-y-6 animate-in fade-in duration-500">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Reports & Insights</h1>
+          <p className="text-slate-500 mt-1">Platform analytics and reports.</p>
+        </div>
+        <Card className="p-12">
+          <EmptyState
+            icon={MessageSquare}
+            title="Unable to load stats"
+            description={error instanceof Error ? error.message : 'Unable to load reports. Please try again.'}
+            actionText="Retry"
+            onAction={() => refetch()}
+          />
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">User Reports</h1>
-          <p className="text-slate-500 mt-1">Review and manage reported users and content.</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Reports & Insights</h1>
+        <p className="text-slate-500 mt-1">Platform analytics and reports.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {loading ? (
-          Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)
-        ) : (
-          <>
-            <StatCard title={MOCK_REPORT_STATS.pending.label} value={MOCK_REPORT_STATS.pending.value} icon={AlertTriangle} />
-            <StatCard title={MOCK_REPORT_STATS.resolved.label} value={MOCK_REPORT_STATS.resolved.value} icon={CheckCircle} />
-          </>
-        )}
-      </div>
-
-      <Card className="overflow-hidden">
-        <div className="p-4 border-b border-slate-100 bg-white flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="relative w-full sm:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-            <Input 
-              placeholder="Search users..." 
-              className="pl-9 bg-slate-50 border-slate-200"
-              value={search}
-              onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-            />
-          </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <FilterDropdown 
-              label="Status"
-              value={statusFilter}
-              onChange={(v) => { setStatusFilter(v); setPage(1); }}
-              options={[
-                { label: 'Pending', value: 'Pending' },
-                { label: 'Resolved', value: 'Resolved' },
-                { label: 'Dismissed', value: 'Dismissed' },
-              ]}
-            />
-          </div>
+      {isLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
         </div>
-        
-        <div className="bg-white">
-          {loading ? (
-            <div className="p-6"><TableSkeleton rows={5} /></div>
-          ) : filteredData.length === 0 ? (
-            <EmptyState 
-              icon={MessageSquare} 
-              title="No reports found" 
-              description="There are no user reports matching your current criteria."
-            />
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow className="bg-slate-50/50">
-                    <TableHead>Reporter</TableHead>
-                    <TableHead>Reported User</TableHead>
-                    <TableHead>Reason</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((r) => (
-                    <TableRow key={r.id}>
-                      <TableCell className="font-medium text-slate-900">{r.reporter}</TableCell>
-                      <TableCell className="font-medium text-slate-900">{r.reportedUser}</TableCell>
-                      <TableCell className="text-slate-600">{r.reason}</TableCell>
-                      <TableCell className="text-slate-600">{new Date(r.date).toLocaleDateString()}</TableCell>
-                      <TableCell><StatusBadge status={r.status} /></TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="outline" size="sm" onClick={() => openDetails(r)}>View Details</Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              <div className="border-t border-slate-100 bg-white">
-                <Pagination currentPage={page} totalPages={Math.ceil(filteredData.length / 10)} onPageChange={setPage} />
-              </div>
-            </>
-          )}
-        </div>
-      </Card>
-
-      <Modal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        title="Report Details"
-        footer={
-          selectedReport?.status === 'Pending' ? (
-            <>
-              <Button variant="outline" onClick={() => handleAction('dismiss')} className="text-slate-600">Dismiss</Button>
-              <Button onClick={() => handleAction('resolve')}>Resolve Issue</Button>
-            </>
-          ) : (
-            <Button onClick={() => setModalOpen(false)}>Close</Button>
-          )
-        }
-      >
-        {selectedReport && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <span className="block text-xs font-medium text-slate-500 mb-1">Reporter</span>
-                <span className="block font-semibold text-slate-900">{selectedReport.reporter}</span>
-              </div>
-              <div className="bg-slate-50 p-3 rounded-lg border border-slate-100">
-                <span className="block text-xs font-medium text-slate-500 mb-1">Reported User</span>
-                <span className="block font-semibold text-slate-900">{selectedReport.reportedUser}</span>
-              </div>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Reason</h4>
-              <p className="text-slate-700 bg-white border border-slate-200 rounded-md p-3 text-sm">{selectedReport.reason}</p>
-            </div>
-            
-            <div>
-              <h4 className="text-sm font-semibold text-slate-900 mb-2">Details</h4>
-              <p className="text-slate-700 bg-white border border-slate-200 rounded-md p-3 text-sm min-h-[100px] whitespace-pre-wrap">{selectedReport.details}</p>
-            </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard title="Total Students" value={stats?.totalStudents.toString() || '0'} icon={Users} />
+            <StatCard title="Total Sessions" value={stats?.totalSessions.toString() || '0'} icon={Calendar} />
+            <StatCard title="Total Reviews" value={stats?.totalReviews.toString() || '0'} icon={MessageSquare} />
+            <StatCard title="Pending Verifications" value={stats?.pendingVerifications.toString() || '0'} icon={UserCheck} />
           </div>
-        )}
-      </Modal>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Sessions by Status</h2>
+              <div className="space-y-3">
+                {stats?.sessionsByStatus && Object.entries(stats.sessionsByStatus).map(([key, value]) => (
+                  <div key={key} className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600">{key.toLowerCase()}</span>
+                    <span className="text-sm font-medium text-slate-900">{value}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Platform Growth</h2>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">New Students (30d)</span>
+                  <span className="text-sm font-medium text-slate-900">{stats?.newStudentsLast30Days || 0}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-600">Average Rating</span>
+                  <span className="text-sm font-medium text-slate-900">{stats?.averageRating?.toFixed(1) || '0.0'}</span>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Actions</h2>
+              <div className="space-y-3">
+                <Button variant="outline" className="w-full justify-between">
+                  Export Student Data
+                  <ArrowUpRight className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" className="w-full justify-between">
+                  Export Session Logs
+                  <ArrowUpRight className="w-4 h-4" />
+                </Button>
+                <Button variant="outline" className="w-full justify-between">
+                  Generate Report
+                  <ArrowUpRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </>
+      )}
     </div>
   );
 }
