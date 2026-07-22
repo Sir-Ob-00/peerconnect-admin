@@ -1,49 +1,74 @@
 import { useState } from 'react';
-import { UserCheck, Check, X, FileText, Users } from 'lucide-react';
+import { UserCheck, Check, X, FileText, Users, Clock } from 'lucide-react';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Modal } from '../components/ui/Modal';
 import { Skeleton } from '../components/ui/LoadingSkeleton';
 import { EmptyState } from '../components/ui/EmptyState';
+import { Avatar } from '../components/ui/Avatar';
 import toast from 'react-hot-toast';
-import { usePendingVerifications, useApproveVerification, useRejectVerification } from '../hooks/useVerifications';
+import { usePendingVerifications, useApproveVerification, useRejectVerification, useInReviewVerification } from '../hooks/useVerifications';
 
 export default function Verification() {
   const { data: verifications = [], isLoading, error, refetch } = usePendingVerifications();
   const approveMutation = useApproveVerification();
   const rejectMutation = useRejectVerification();
+  const inReviewMutation = useInReviewVerification();
 
+  const [approveModal, setApproveModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [rejectModal, setRejectModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
-  const [reason, setReason] = useState('');
+  const [inReviewModal, setInReviewModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
+  const [notes, setNotes] = useState('');
 
-  const handleApprove = (userId: string) => {
-    approveMutation.mutate(userId, {
-      onSuccess: () => {
-        toast.success('Student verified successfully!');
-      },
-    });
-  };
+  const handleAction = (type: 'approve' | 'reject' | 'in-review') => {
+    const userId = type === 'approve' ? approveModal.userId : type === 'reject' ? rejectModal.userId : inReviewModal.userId;
+    if (!userId) return;
 
-  const handleReject = () => {
-    if (!reason.trim()) {
-      toast.error('Please provide a reason for rejection.');
+    if (!notes.trim()) {
+      toast.error('Please provide a note.');
       return;
     }
-    if (!rejectModal.userId) return;
 
-    rejectMutation.mutate(
-      { userId: rejectModal.userId, reason },
-      {
-        onSuccess: () => {
-          toast.success('Verification rejected.');
-          setRejectModal({ isOpen: false, userId: null });
-          setReason('');
-        },
-        onError: () => {
-          toast.error('Failed to reject verification.');
-        },
-      }
-    );
+    if (type === 'approve') {
+      approveMutation.mutate(
+        { userId, notes },
+        {
+          onSuccess: () => {
+            toast.success('Student verified successfully!');
+            setApproveModal({ isOpen: false, userId: null });
+            setNotes('');
+          },
+        }
+      );
+    } else if (type === 'reject') {
+      rejectMutation.mutate(
+        { userId, notes },
+        {
+          onSuccess: () => {
+            toast.success('Verification rejected.');
+            setRejectModal({ isOpen: false, userId: null });
+            setNotes('');
+          },
+          onError: () => {
+            toast.error('Failed to reject verification.');
+          },
+        }
+      );
+    } else if (type === 'in-review') {
+      inReviewMutation.mutate(
+        { userId, notes },
+        {
+          onSuccess: () => {
+            toast.success('Moved back to review queue.');
+            setInReviewModal({ isOpen: false, userId: null });
+            setNotes('');
+          },
+          onError: () => {
+            toast.error('Failed to move to review queue.');
+          },
+        }
+      );
+    }
   };
 
   const handleRetry = () => {
@@ -101,12 +126,11 @@ export default function Verification() {
             <Card key={v.userId} className="flex flex-col overflow-hidden">
               <div className="p-6 flex-1">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-lg">
-                    {v.fullName.charAt(0)}
-                  </div>
+                  <Avatar src={v.profileImage || undefined} fallback={v.fullName} size="lg" />
                   <div>
                     <h3 className="font-bold text-slate-900">{v.fullName}</h3>
-                    <p className="text-xs text-slate-500">{v.department}</p>
+                    <p className="text-xs text-slate-500">{v.profile?.university || 'University'}</p>
+                    <p className="text-xs text-slate-400">{v.profile?.department} • {v.profile?.level}</p>
                   </div>
                 </div>
 
@@ -116,22 +140,39 @@ export default function Verification() {
                     <span className="font-medium">Student ID</span>
                   </div>
                   <div className="aspect-video bg-slate-200 rounded-md flex items-center justify-center overflow-hidden border border-slate-300">
-                    <img
-                      src={v.idPhotoUrl}
-                      alt="Student ID"
-                      className="w-full h-full object-cover"
-                    />
+                    {v.idPhotoUrl?.startsWith('http') ? (
+                      <img
+                        src={v.idPhotoUrl}
+                        alt="Student ID"
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                    ) : (
+                      <div className="text-slate-400 text-sm">ID Document Preview</div>
+                    )}
                   </div>
                 </div>
+
+                {v.adminNotes && (
+                  <div className="mb-3 p-3 bg-yellow-50 border border-yellow-100 rounded-lg">
+                    <p className="text-xs text-yellow-800">
+                      <span className="font-semibold">Admin Note:</span> {v.adminNotes}
+                    </p>
+                  </div>
+                )}
+
                 <p className="text-xs text-slate-500">Submitted: {new Date(v.submittedAt).toLocaleDateString()}</p>
               </div>
 
               <div className="p-4 bg-slate-50 border-t border-slate-100 flex gap-3">
-                <Button className="flex-1" onClick={() => handleApprove(v.userId)}>
-                  <Check className="w-4 h-4 mr-2" /> Approve
-                </Button>
                 <Button variant="outline" className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200" onClick={() => setRejectModal({ isOpen: true, userId: v.userId })}>
                   <X className="w-4 h-4 mr-2" /> Reject
+                </Button>
+                <Button variant="outline" className="flex-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200" onClick={() => setInReviewModal({ isOpen: true, userId: v.userId })}>
+                  <Clock className="w-4 h-4 mr-2" /> In Review
+                </Button>
+                <Button className="flex-1 bg-brand-600 hover:bg-brand-700 text-white" onClick={() => setApproveModal({ isOpen: true, userId: v.userId })}>
+                  <Check className="w-4 h-4 mr-2" /> Approve
                 </Button>
               </div>
             </Card>
@@ -140,23 +181,67 @@ export default function Verification() {
       )}
 
       <Modal
-        isOpen={rejectModal.isOpen}
-        onClose={() => setRejectModal({ isOpen: false, userId: null })}
-        title="Reject Verification"
+        isOpen={approveModal.isOpen}
+        onClose={() => { setApproveModal({ isOpen: false, userId: null }); setNotes(''); }}
+        title="Approve Verification"
         footer={
           <>
-            <Button variant="outline" onClick={() => setRejectModal({ isOpen: false, userId: null })}>Cancel</Button>
-            <Button variant="danger" onClick={handleReject}>Confirm Rejection</Button>
+            <Button variant="outline" onClick={() => { setApproveModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
+            <Button onClick={() => handleAction('approve')}>Confirm Approval</Button>
           </>
         }
       >
         <div className="space-y-4">
-          <p className="text-sm text-slate-600">Please provide a reason for rejecting this verification document. This will be sent to the student.</p>
+          <p className="text-sm text-slate-600">Please provide a note for approving this verification.</p>
+          <textarea
+            className="w-full h-32 p-3 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
+            placeholder="e.g., All documents verified and approved."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={rejectModal.isOpen}
+        onClose={() => { setRejectModal({ isOpen: false, userId: null }); setNotes(''); }}
+        title="Reject Verification"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => { setRejectModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
+            <Button variant="danger" onClick={() => handleAction('reject')}>Confirm Rejection</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">Please provide a note for rejecting this verification. This will be sent to the student.</p>
           <textarea
             className="w-full h-32 p-3 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
             placeholder="e.g., The image is too blurry to read the student ID number..."
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={inReviewModal.isOpen}
+        onClose={() => { setInReviewModal({ isOpen: false, userId: null }); setNotes(''); }}
+        title="Move to In Review"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => { setInReviewModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
+            <Button onClick={() => handleAction('in-review')}>Confirm</Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">Please provide a note for moving this verification back to the review queue.</p>
+          <textarea
+            className="w-full h-32 p-3 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
+            placeholder="e.g., Need additional verification of student ID..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
           />
         </div>
       </Modal>

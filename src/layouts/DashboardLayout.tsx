@@ -53,7 +53,12 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="flex h-screen overflow-hidden relative">
+      {/* Centered logo background */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.1]">
+        <img src="/logo.png" alt="" className="w-[600px] h-[600px] object-contain" />
+      </div>
+
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div 
@@ -65,13 +70,13 @@ export default function DashboardLayout() {
       {/* Sidebar */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto",
+          "fixed inset-y-0 left-0 z-30 w-64 bg-brand-700 text-white transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-auto",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className="flex flex-col h-full">
-          <div className="h-16 flex items-center px-6 border-b border-slate-200">
-            <span className="text-xl font-bold text-brand-600">PeerConnect Admin</span>
+          <div className="h-16 flex items-center px-6 border-b border-white/10">
+            <span className="text-xl font-bold">PeerConnect Admin</span>
           </div>
           
           <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
@@ -84,8 +89,8 @@ export default function DashboardLayout() {
                   className={({ isActive }) => cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
                     isActive 
-                      ? "bg-brand-50 text-brand-700" 
-                      : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                      ? "bg-white/20 text-white" 
+                      : "text-brand-100 hover:bg-white/10 hover:text-white"
                   )}
                   onClick={() => setSidebarOpen(false)}
                 >
@@ -96,10 +101,10 @@ export default function DashboardLayout() {
             })}
           </nav>
 
-          <div className="p-4 border-t border-slate-200">
+          <div className="p-4 border-t border-white/10">
             <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-slate-600 hover:bg-red-50 hover:text-red-700 transition-colors"
+              className="flex items-center gap-3 px-3 py-2.5 w-full rounded-lg text-sm font-medium text-brand-100 hover:bg-white/10 hover:text-white transition-colors"
             >
               <LogOut className="w-5 h-5" />
               Logout
@@ -111,7 +116,7 @@ export default function DashboardLayout() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
+        <header className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur-md border-b border-white/50">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"
@@ -132,8 +137,8 @@ export default function DashboardLayout() {
         </header>
 
         {/* Page Content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
+        <div className="flex-1 overflow-y-auto relative">
+          <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto relative z-10">
             <Outlet />
           </div>
         </div>

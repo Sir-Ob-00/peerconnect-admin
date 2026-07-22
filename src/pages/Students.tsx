@@ -23,6 +23,8 @@ type Student = {
   department: string;
   status: string;
   joinedDate: string;
+  university: string;
+  level: string;
   avatar?: string;
 };
 
@@ -51,12 +53,14 @@ export default function Students() {
 
   const students: Student[] = (data?.data || []).map((s: StudentListItem) => ({
     id: s.id,
-    name: `${s.firstName} ${s.lastName}`,
+    name: s.fullName,
     email: s.email,
-    department: s.profile.department,
+    department: s.department,
     status: s.accountStatus,
     joinedDate: s.createdAt,
-    avatar: s.profileImage || undefined,
+    university: s.university,
+    level: s.level,
+    avatar: s.avatarUrl || undefined,
   }));
 
   const handleAction = () => {
@@ -158,6 +162,7 @@ export default function Students() {
                   <TableHeader>
                     <TableRow className="bg-slate-50/50">
                       <TableHead>Student</TableHead>
+                      <TableHead>University</TableHead>
                       <TableHead>Department</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead>Status</TableHead>
@@ -176,6 +181,7 @@ export default function Students() {
                             </div>
                           </div>
                         </TableCell>
+                        <TableCell className="text-slate-600">{s.university}</TableCell>
                         <TableCell className="text-slate-600">{s.department}</TableCell>
                         <TableCell className="text-slate-600">{new Date(s.joinedDate).toLocaleDateString()}</TableCell>
                         <TableCell><StatusBadge status={s.status} /></TableCell>
