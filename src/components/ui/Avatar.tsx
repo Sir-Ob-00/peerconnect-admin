@@ -28,7 +28,7 @@ export function Avatar({ src, fallback, size = 'md', className, ...props }: Avat
           onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
         />
       ) : (
-        <span className="uppercase">{fallback.slice(0, 2)}</span>
+        <span className="uppercase">{fallback?.slice(0, 2) ?? ''}</span>
       )}
     </div>
   );

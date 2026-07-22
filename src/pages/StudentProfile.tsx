@@ -79,6 +79,9 @@ export default function StudentProfile() {
           toast.success('Student verified successfully!');
           refetch();
         },
+        onError: (err) => {
+          toast.error(err instanceof Error ? err.message : 'Failed to approve verification.');
+        },
       }
     );
   };
@@ -91,6 +94,9 @@ export default function StudentProfile() {
         onSuccess: () => {
           toast.success('Verification rejected.');
           refetch();
+        },
+        onError: (err) => {
+          toast.error(err instanceof Error ? err.message : 'Failed to reject verification.');
         },
       }
     );

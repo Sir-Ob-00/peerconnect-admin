@@ -116,7 +116,7 @@ export default function DashboardLayout() {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white/70 backdrop-blur-md border-b border-white/50">
+         <header className="h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 bg-white border-b border-slate-200">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 -ml-2 text-slate-600 hover:bg-slate-100 rounded-lg"

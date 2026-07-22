@@ -20,54 +20,26 @@ export default function Verification() {
   const [inReviewModal, setInReviewModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [notes, setNotes] = useState('');
 
-  const handleAction = (type: 'approve' | 'reject' | 'in-review') => {
+  const handleAction = async (type: 'approve' | 'reject' | 'in-review') => {
     const userId = type === 'approve' ? approveModal.userId : type === 'reject' ? rejectModal.userId : inReviewModal.userId;
-    if (!userId) return;
-
-    if (!notes.trim()) {
-      toast.error('Please provide a note.');
+    if (!userId) {
+      toast.error('No user selected.');
       return;
     }
 
-    if (type === 'approve') {
-      approveMutation.mutate(
-        { userId, notes },
-        {
-          onSuccess: () => {
-            toast.success('Student verified successfully!');
-            setApproveModal({ isOpen: false, userId: null });
-            setNotes('');
-          },
-        }
-      );
-    } else if (type === 'reject') {
-      rejectMutation.mutate(
-        { userId, notes },
-        {
-          onSuccess: () => {
-            toast.success('Verification rejected.');
-            setRejectModal({ isOpen: false, userId: null });
-            setNotes('');
-          },
-          onError: () => {
-            toast.error('Failed to reject verification.');
-          },
-        }
-      );
-    } else if (type === 'in-review') {
-      inReviewMutation.mutate(
-        { userId, notes },
-        {
-          onSuccess: () => {
-            toast.success('Moved back to review queue.');
-            setInReviewModal({ isOpen: false, userId: null });
-            setNotes('');
-          },
-          onError: () => {
-            toast.error('Failed to move to review queue.');
-          },
-        }
-      );
+    const setModal = type === 'approve' ? setApproveModal : type === 'reject' ? setRejectModal : setInReviewModal;
+    const mutation = type === 'approve' ? approveMutation : type === 'reject' ? rejectMutation : inReviewMutation;
+    const label = type === 'approve' ? 'approve' : type === 'reject' ? 'reject' : 'move to review';
+
+    setModal({ isOpen: false, userId: null });
+    setNotes('');
+
+    try {
+      await mutation.mutateAsync({ userId, notes: notes || undefined });
+      toast.success(`Verification ${label}d successfully!`);
+    } catch (err) {
+      console.error(`Failed to ${label} verification:`, err);
+      toast.error(`Failed to ${label} verification.`);
     }
   };
 
@@ -187,7 +159,7 @@ export default function Verification() {
         footer={
           <>
             <Button variant="outline" onClick={() => { setApproveModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
-            <Button onClick={() => handleAction('approve')}>Confirm Approval</Button>
+            <Button disabled={approveMutation.isPending} onClick={() => handleAction('approve')}>{approveMutation.isPending ? 'Approving...' : 'Confirm Approval'}</Button>
           </>
         }
       >
@@ -209,7 +181,7 @@ export default function Verification() {
         footer={
           <>
             <Button variant="outline" onClick={() => { setRejectModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
-            <Button variant="danger" onClick={() => handleAction('reject')}>Confirm Rejection</Button>
+            <Button variant="danger" disabled={rejectMutation.isPending} onClick={() => handleAction('reject')}>{rejectMutation.isPending ? 'Rejecting...' : 'Confirm Rejection'}</Button>
           </>
         }
       >
@@ -231,7 +203,7 @@ export default function Verification() {
         footer={
           <>
             <Button variant="outline" onClick={() => { setInReviewModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
-            <Button onClick={() => handleAction('in-review')}>Confirm</Button>
+            <Button disabled={inReviewMutation.isPending} onClick={() => handleAction('in-review')}>{inReviewMutation.isPending ? 'Moving...' : 'Confirm'}</Button>
           </>
         }
       >
