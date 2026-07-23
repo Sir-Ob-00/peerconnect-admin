@@ -1,10 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getPendingVerifications, approveVerification, rejectVerification, inReviewVerification } from '../services/verifications';
+import { getPendingVerifications, getVerificationDetail, approveVerification, rejectVerification, inReviewVerification } from '../services/verifications';
+import type { VerificationDetailResponse } from '../types/api';
 
 export function usePendingVerifications() {
   return useQuery({
     queryKey: ['verifications', 'pending'],
     queryFn: getPendingVerifications,
+  });
+}
+
+export function useVerificationDetail(userId: string) {
+  return useQuery<VerificationDetailResponse>({
+    queryKey: ['verifications', 'detail', userId],
+    queryFn: () => getVerificationDetail(userId),
+    enabled: !!userId,
   });
 }
 

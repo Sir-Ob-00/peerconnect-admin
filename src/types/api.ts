@@ -5,17 +5,21 @@ export interface UserSkill {
   proficiency: string;
 }
 
-export interface StudentProfile {
+export interface AcademicProfile {
   university: string;
   department: string;
+  programme: string;
   level: string;
+}
+
+export interface StudentProfile {
+  wantsToLearnCourses: boolean;
+  wantsToLearnSkills: boolean;
   skills: string[];
   learningInterests: string[];
   bio: string;
   availability: string;
   isAvailable: boolean;
-  profilePhoto: string | null;
-  studentId: string | null;
 }
 
 export interface User {
@@ -63,35 +67,69 @@ export interface StudentListItem {
   level: string;
   createdAt: string;
   updatedAt: string;
+  academicProfile?: AcademicProfile;
 }
 
-export interface StudentDetail {
+export interface CourseItem {
+  id: string;
+  name: string;
+  code?: string;
+}
+
+export interface SkillItem {
+  id: string;
+  name: string;
+}
+
+export interface LearningGoals {
+  courses: CourseItem[];
+  skills: SkillItem[];
+}
+
+export interface CanHelpWith {
+  courses: CourseItem[];
+  skills: SkillItem[];
+}
+
+export interface LearningInterestObject {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface AvailabilitySlot {
+  id: string;
+  dayOfWeek: string;
+  startTime: string;
+  endTime: string;
+}
+
+export interface IdVerification {
+  idPhotoUrl: string;
+  status: string;
+  submittedAt: string;
+  rejectionReason: string | null;
+}
+
+export interface StudentSummary {
   id: string;
   fullName: string;
   email: string;
-  university: string;
-  department: string;
-  level: string;
-  accountType: string;
-  accountStatus: string;
-  avatarUrl: string | null;
-  bio: string;
-  skills: UserSkill[];
-  learningInterests: string[];
-  availability: string;
-  setupProgress: string;
-  idPhotoUrl: string | null;
-  rating: number;
-  sessionsCompleted: number;
-  studentsHelped: number;
-  isAvailable: boolean;
-  isOnline: boolean;
-  isVerified: boolean;
-  emailVerified: boolean;
-  studentVerified: boolean;
+  profileImage: string | null;
   verificationStatus: string;
+  setupProgress: string;
   createdAt: string;
-  updatedAt: string;
+}
+
+export interface StudentDetail {
+  student: StudentSummary;
+  academicProfile: AcademicProfile;
+  learningGoals: LearningGoals;
+  canHelpWith: CanHelpWith;
+  learningInterests: LearningInterestObject[];
+  availability: AvailabilitySlot[];
+  bio: string | null;
+  idVerification: IdVerification;
 }
 
 export interface StudentsListResponse {
@@ -287,17 +325,24 @@ export interface VerificationItem {
   userId: string;
   fullName: string;
   email: string;
-  role: string;
-  accountStatus: string;
-  setupProgress: string;
   verificationStatus: string;
-  isEmailVerified: boolean;
-  studentVerified: boolean;
-  profileImage: string | null;
   idPhotoUrl: string;
-  adminNotes: string | null;
   submittedAt: string;
+  academicProfile: AcademicProfile;
   profile: StudentProfile;
+  adminNotes?: string | null;
+  profileImage?: string | null;
+}
+
+export interface VerificationDetailResponse {
+  student: StudentSummary;
+  academicProfile: AcademicProfile;
+  learningGoals: LearningGoals;
+  canHelpWith: CanHelpWith;
+  learningInterests: LearningInterestObject[];
+  availability: AvailabilitySlot[];
+  bio: string | null;
+  idVerification: IdVerification;
 }
 
 export interface ApiResponse<T> {

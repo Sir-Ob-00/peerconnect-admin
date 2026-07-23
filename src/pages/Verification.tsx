@@ -95,14 +95,27 @@ export default function Verification() {
           {verifications.map((v) => (
             <Card key={v.userId} className="flex flex-col overflow-hidden">
               <div className="p-6 flex-1">
-                <div className="flex items-center gap-4 mb-4">
-                  <Avatar src={v.profileImage || undefined} fallback={v.fullName} size="lg" />
-                  <div>
-                    <h3 className="font-bold text-slate-900">{v.fullName}</h3>
-                    <p className="text-xs text-slate-500">{v.profile?.university || 'University'}</p>
-                    <p className="text-xs text-slate-400">{v.profile?.department} • {v.profile?.level}</p>
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar src={v.profileImage || undefined} fallback={v.fullName} size="lg" />
+                    <div>
+                      <h3 className="font-bold text-slate-900">{v.fullName}</h3>
+                      <p className="text-xs text-slate-500">{v.academicProfile.university}</p>
+                      <p className="text-xs text-slate-400">{v.academicProfile.programme} • {v.academicProfile.level}</p>
+                    </div>
                   </div>
-                </div>
+
+                  <div className="flex gap-2 mb-3 flex-wrap">
+                    {v.profile.wantsToLearnCourses && (
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                        Learning Courses
+                      </span>
+                    )}
+                    {v.profile.wantsToLearnSkills && (
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-100">
+                        Learning Skills
+                      </span>
+                    )}
+                  </div>
 
                 <div className="bg-slate-50 rounded-lg p-4 mb-4 border border-slate-100">
                   <div className="flex items-center gap-2 mb-2 text-sm text-slate-700">

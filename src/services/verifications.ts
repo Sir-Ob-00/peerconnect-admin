@@ -1,8 +1,13 @@
 import { get, patch } from './api';
-import type { VerificationItem } from '../types/api';
+import type { VerificationItem, VerificationDetailResponse } from '../types/api';
 
 export async function getPendingVerifications(): Promise<VerificationItem[]> {
   const response = await get<VerificationItem[]>('/admin/verifications', { status: 'pending_approval' });
+  return response.data;
+}
+
+export async function getVerificationDetail(userId: string): Promise<VerificationDetailResponse> {
+  const response = await get<VerificationDetailResponse>(`/admin/verifications/${userId}`);
   return response.data;
 }
 

@@ -55,11 +55,11 @@ export default function Students() {
     id: s.id,
     name: s.fullName,
     email: s.email,
-    department: s.department,
+    department: s.academicProfile?.department || s.department,
     status: s.accountStatus,
     joinedDate: s.createdAt,
-    university: s.university,
-    level: s.level,
+    university: s.academicProfile?.university || s.university,
+    level: s.academicProfile?.level || s.level,
     avatar: s.avatarUrl || undefined,
   }));
 
