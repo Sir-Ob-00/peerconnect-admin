@@ -8,13 +8,18 @@ export function usePendingVerifications() {
   });
 }
 
+function invalidateVerificationRelatedQueries(queryClient: ReturnType<typeof useQueryClient>) {
+  queryClient.invalidateQueries({ queryKey: ['verifications'] });
+  queryClient.invalidateQueries({ queryKey: ['stats'] });
+}
+
 export function useApproveVerification() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ userId, notes }: { userId: string; notes?: string }) =>
       approveVerification(userId, notes),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['verifications'] });
+      invalidateVerificationRelatedQueries(queryClient);
     },
   });
 }
@@ -25,7 +30,7 @@ export function useRejectVerification() {
     mutationFn: ({ userId, notes }: { userId: string; notes?: string }) =>
       rejectVerification(userId, notes),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['verifications'] });
+      invalidateVerificationRelatedQueries(queryClient);
     },
   });
 }
@@ -36,7 +41,7 @@ export function useInReviewVerification() {
     mutationFn: ({ userId, notes }: { userId: string; notes?: string }) =>
       inReviewVerification(userId, notes),
     onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ['verifications'] });
+      invalidateVerificationRelatedQueries(queryClient);
     },
   });
 }

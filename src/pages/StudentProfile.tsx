@@ -36,6 +36,8 @@ export default function StudentProfile() {
     type: 'suspend',
   });
   const [photoModal, setPhotoModal] = useState(false);
+  const [rejectModal, setRejectModal] = useState(false);
+  const [rejectNotes, setRejectNotes] = useState('');
 
   const { data: studentDetail, isLoading, error, refetch } = useStudentById(id || '');
   const suspendMutation = useSuspendStudent();
@@ -204,16 +206,10 @@ export default function StudentProfile() {
 
           {studentDetail.verificationStatus === 'pending_approval' && (
             <div className="flex gap-2 shrink-0">
-              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => {
-                const notes = prompt('Rejection reason (required):');
-                if (notes) handleReject(notes);
-              }}>
+              <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={() => setRejectModal(true)}>
                 <X className="w-4 h-4 mr-2" /> Reject
               </Button>
-              <Button className="bg-brand-600 hover:bg-brand-700 text-white" onClick={() => {
-                const notes = prompt('Approval note (optional):') || undefined;
-                handleApprove(notes);
-              }}>
+              <Button className="bg-brand-600 hover:bg-brand-700 text-white" onClick={() => handleApprove()}>
                 <Check className="w-4 h-4 mr-2" /> Approve
               </Button>
             </div>
@@ -375,6 +371,30 @@ export default function StudentProfile() {
         message={`Are you sure you want to ${modal.type} ${studentDetail.fullName}? ${modal.type === 'delete' ? 'This action is permanent.' : ''}`}
         variant={modal.type === 'delete' ? 'danger' : modal.type === 'suspend' ? 'warning' : 'primary'}
       />
+
+      <Modal
+        isOpen={rejectModal}
+        onClose={() => { setRejectModal(false); setRejectNotes(''); }}
+        title="Reject Verification"
+        footer={
+          <>
+            <Button variant="outline" onClick={() => { setRejectModal(false); setRejectNotes(''); }}>Cancel</Button>
+            <Button variant="danger" disabled={!rejectNotes.trim() || rejectMutation.isPending} onClick={() => { handleReject(rejectNotes); setRejectModal(false); setRejectNotes(''); }}>
+              {rejectMutation.isPending ? 'Rejecting...' : 'Confirm Rejection'}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-slate-600">Please provide a reason for rejecting this verification. This will be sent to the student.</p>
+          <textarea
+            className="w-full h-32 p-3 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
+            placeholder="e.g., The image is too blurry to read the student ID number..."
+            value={rejectNotes}
+            onChange={(e) => setRejectNotes(e.target.value)}
+          />
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -41,7 +41,7 @@ export default function Dashboard() {
           Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 w-full" />)
         ) : (
           <>
-            <StatCard title="Total Students" value={stats?.totalStudents.toString() || '0'} icon={Users} color="brand-400" />
+            <StatCard title="Total Students" value={((stats?.totalStudents ?? 0) - (stats?.pendingVerifications ?? 0)).toString() || '0'} icon={Users} color="brand-400" />
             <StatCard title="Learning Sessions" value={stats?.totalSessions.toString() || '0'} icon={Calendar} color="brand-500" />
             <StatCard title="Total Reviews" value={stats?.totalReviews.toString() || '0'} icon={Star} color="brand-600" />
             <StatCard title="Pending Verifications" value={stats?.pendingVerifications.toString() || '0'} icon={UserCheck} color="brand-700" />

@@ -45,7 +45,7 @@ export default function Reports() {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="Total Students" value={stats?.totalStudents.toString() || '0'} icon={Users} />
+            <StatCard title="Total Students" value={((stats?.totalStudents ?? 0) - (stats?.pendingVerifications ?? 0)).toString() || '0'} icon={Users} />
             <StatCard title="Total Sessions" value={stats?.totalSessions.toString() || '0'} icon={Calendar} />
             <StatCard title="Total Reviews" value={stats?.totalReviews.toString() || '0'} icon={MessageSquare} />
             <StatCard title="Pending Verifications" value={stats?.pendingVerifications.toString() || '0'} icon={UserCheck} />

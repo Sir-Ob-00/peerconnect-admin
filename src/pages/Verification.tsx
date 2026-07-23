@@ -15,21 +15,19 @@ export default function Verification() {
   const rejectMutation = useRejectVerification();
   const inReviewMutation = useInReviewVerification();
 
-  const [approveModal, setApproveModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [rejectModal, setRejectModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [inReviewModal, setInReviewModal] = useState<{ isOpen: boolean; userId: string | null }>({ isOpen: false, userId: null });
   const [notes, setNotes] = useState('');
 
-  const handleAction = async (type: 'approve' | 'reject' | 'in-review') => {
-    const userId = type === 'approve' ? approveModal.userId : type === 'reject' ? rejectModal.userId : inReviewModal.userId;
+  const handleAction = async (type: 'reject' | 'in-review') => {
+    const { userId, setModal, mutation, label } = type === 'reject'
+      ? { userId: rejectModal.userId, setModal: setRejectModal, mutation: rejectMutation, label: 'reject' }
+      : { userId: inReviewModal.userId, setModal: setInReviewModal, mutation: inReviewMutation, label: 'move to review' };
+
     if (!userId) {
       toast.error('No user selected.');
       return;
     }
-
-    const setModal = type === 'approve' ? setApproveModal : type === 'reject' ? setRejectModal : setInReviewModal;
-    const mutation = type === 'approve' ? approveMutation : type === 'reject' ? rejectMutation : inReviewMutation;
-    const label = type === 'approve' ? 'approve' : type === 'reject' ? 'reject' : 'move to review';
 
     setModal({ isOpen: false, userId: null });
     setNotes('');
@@ -143,7 +141,7 @@ export default function Verification() {
                 <Button variant="outline" className="flex-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 border-amber-200" onClick={() => setInReviewModal({ isOpen: true, userId: v.userId })}>
                   <Clock className="w-4 h-4 mr-2" /> In Review
                 </Button>
-                <Button className="flex-1 bg-brand-600 hover:bg-brand-700 text-white" onClick={() => setApproveModal({ isOpen: true, userId: v.userId })}>
+                <Button className="flex-1 bg-brand-600 hover:bg-brand-700 text-white" onClick={async () => { try { await approveMutation.mutateAsync({ userId: v.userId }); toast.success('Verification approved successfully!'); } catch (err) { console.error('Failed to approve verification:', err); toast.error('Failed to approve verification.'); } }}>
                   <Check className="w-4 h-4 mr-2" /> Approve
                 </Button>
               </div>
@@ -151,28 +149,6 @@ export default function Verification() {
           ))}
         </div>
       )}
-
-      <Modal
-        isOpen={approveModal.isOpen}
-        onClose={() => { setApproveModal({ isOpen: false, userId: null }); setNotes(''); }}
-        title="Approve Verification"
-        footer={
-          <>
-            <Button variant="outline" onClick={() => { setApproveModal({ isOpen: false, userId: null }); setNotes(''); }}>Cancel</Button>
-            <Button disabled={approveMutation.isPending} onClick={() => handleAction('approve')}>{approveMutation.isPending ? 'Approving...' : 'Confirm Approval'}</Button>
-          </>
-        }
-      >
-        <div className="space-y-4">
-          <p className="text-sm text-slate-600">Please provide a note for approving this verification.</p>
-          <textarea
-            className="w-full h-32 p-3 border border-slate-300 rounded-md text-sm focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none resize-none"
-            placeholder="e.g., All documents verified and approved."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-          />
-        </div>
-      </Modal>
 
       <Modal
         isOpen={rejectModal.isOpen}
