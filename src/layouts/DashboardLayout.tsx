@@ -81,7 +81,11 @@ export default function DashboardLayout() {
   }, [error, navigate]);
 
   const handleLogout = () => {
-    logout.mutate();
+    logout.mutate(undefined, {
+      onSettled: () => {
+        navigate('/login');
+      },
+    });
   };
 
   if (isLoading && localStorage.getItem('accessToken')) {
