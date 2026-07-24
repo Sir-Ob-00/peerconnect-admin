@@ -82,7 +82,7 @@ export default function Verification() {
             </Card>
           ))}
         </div>
-      ) : verifications.length === 0 ? (
+      ) : (!Array.isArray(verifications) || verifications.length === 0) ? (
         <Card className="p-12">
           <EmptyState
             icon={UserCheck}

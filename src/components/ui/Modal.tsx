@@ -30,8 +30,8 @@ export function Modal({ isOpen, onClose, title, children, footer, maxWidth = 'md
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
-      <div className="fixed inset-0 bg-slate-900/50 transition-opacity" onClick={onClose} />
-      <div className={cn("relative bg-white rounded-xl shadow-xl w-full flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200", maxWidthClasses[maxWidth])}>
+      <div className="fixed inset-0 bg-slate-900/60 transition-opacity" onClick={onClose} />
+      <div className={cn("relative z-10 bg-white rounded-xl shadow-2xl w-full flex flex-col max-h-[90vh] border border-slate-200 opacity-100", maxWidthClasses[maxWidth])}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
           <h2 className="text-lg font-semibold text-slate-900">{title}</h2>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors p-1 rounded-md hover:bg-slate-100">

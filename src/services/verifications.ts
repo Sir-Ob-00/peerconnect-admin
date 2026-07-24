@@ -2,8 +2,12 @@ import { get, patch } from './api';
 import type { VerificationItem, VerificationDetailResponse } from '../types/api';
 
 export async function getPendingVerifications(): Promise<VerificationItem[]> {
-  const response = await get<VerificationItem[]>('/admin/verifications', { status: 'pending_approval' });
-  return response.data;
+  const response = await get<VerificationItem[] | { data: VerificationItem[] }>('/admin/verifications', { status: 'pending_approval' });
+  if (Array.isArray(response.data)) return response.data;
+  if (response.data && Array.isArray((response.data as { data: VerificationItem[] }).data)) {
+    return (response.data as { data: VerificationItem[] }).data;
+  }
+  return [];
 }
 
 export async function getVerificationDetail(userId: string): Promise<VerificationDetailResponse> {

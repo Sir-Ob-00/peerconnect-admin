@@ -381,3 +381,208 @@ export interface LoginResponse {
 export interface LogoutRequest {
   refreshToken?: string;
 }
+
+export interface UniversityItem {
+  id: string;
+  name: string;
+  code?: string;
+  location?: string;
+  status: string;
+  departmentsCount?: number;
+  studentsCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface DepartmentItem {
+  id: string;
+  name: string;
+  code?: string;
+  universityId: string;
+  universityName?: string;
+  status: string;
+  programmesCount?: number;
+  studentsCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface ProgrammeItem {
+  id: string;
+  name: string;
+  code?: string;
+  departmentId: string;
+  departmentName?: string;
+  universityName?: string;
+  durationYears?: number;
+  status: string;
+  studentsCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface LevelItem {
+  id: string;
+  name: string;
+  code: string;
+  sortOrder: number;
+  status: string;
+  studentsCount?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface StudyGroupItem {
+  id: string;
+  name: string;
+  description?: string;
+  creatorId: string;
+  creatorName?: string;
+  university?: string;
+  department?: string;
+  programme?: string;
+  membersCount: number;
+  status: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface StudyGroupMember {
+  userId: string;
+  fullName: string;
+  email: string;
+  avatarUrl?: string | null;
+  role: string;
+  joinedAt: string;
+}
+
+export interface ChatConversationItem {
+  id: string;
+  type: 'DIRECT' | 'GROUP';
+  name?: string;
+  participants: Array<{
+    id: string;
+    fullName: string;
+    avatarUrl?: string | null;
+  }>;
+  lastMessage?: string;
+  lastMessageAt?: string;
+  isFlagged?: boolean;
+  createdAt: string;
+}
+
+export interface ChatMessageItem {
+  id: string;
+  conversationId: string;
+  senderId: string;
+  senderName: string;
+  content: string;
+  isFlagged?: boolean;
+  createdAt: string;
+}
+
+export interface ReportItem {
+  id: string;
+  reporterId: string;
+  reporterName: string;
+  reporterEmail: string;
+  reportedUserId?: string;
+  reportedUserName?: string;
+  targetType: 'USER' | 'STUDY_GROUP' | 'MESSAGE' | 'REVIEW';
+  targetId: string;
+  reason: string;
+  details?: string;
+  status: 'PENDING' | 'INVESTIGATING' | 'RESOLVED' | 'DISMISSED';
+  adminNotes?: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface AnalyticsOverview {
+  totalStudents: number;
+  pendingApprovals: number;
+  approvedStudents: number;
+  rejectedStudents: number;
+  suspendedStudents: number;
+  activeStudents: number;
+  totalStudyGroups: number;
+  totalConnections: number;
+  activeUsers: number;
+  userGrowthRate: number;
+  sessionCompletionRate: number;
+}
+
+export interface UserAnalytics {
+  registrationsOverTime: Array<{ date: string; count: number }>;
+  studentsByUniversity: Array<{ university: string; count: number }>;
+  studentsByDepartment: Array<{ department: string; count: number }>;
+  studentsByLevel: Array<{ level: string; count: number }>;
+  approvalStatusBreakdown: {
+    pending: number;
+    approved: number;
+    rejected: number;
+    suspended: number;
+  };
+}
+
+export interface SessionAnalytics {
+  sessionsOverTime: Array<{ date: string; count: number }>;
+  sessionsByStatus: {
+    PENDING: number;
+    ACCEPTED: number;
+    COMPLETED: number;
+    REJECTED: number;
+    CANCELLED: number;
+  };
+  topSkillsRequested: Array<{ skill: string; count: number }>;
+}
+
+export interface EngagementAnalytics {
+  activeStudyGroups: number;
+  totalPeerConnections: number;
+  messagesSent30Days: number;
+  avgSessionDurationMinutes: number;
+}
+
+export interface NotificationItem {
+  id: string;
+  userId?: string;
+  title: string;
+  message: string;
+  type: string;
+  targetType?: string;
+  isRead?: boolean;
+  sentAt: string;
+}
+
+export interface AnnouncementItem {
+  id: string;
+  title: string;
+  content: string;
+  targetAudience: 'ALL' | 'UNIVERSITY' | 'DEPARTMENT' | 'LEVEL';
+  targetValue?: string;
+  status: 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+  createdAt: string;
+  publishedAt?: string;
+}
+
+export interface AuditLogItem {
+  id: string;
+  action: string;
+  adminId: string;
+  adminName: string;
+  targetEntity: string;
+  targetId?: string;
+  description: string;
+  ipAddress?: string;
+  createdAt: string;
+}
+
+export interface SystemSetting {
+  key: string;
+  value: string | number | boolean | Record<string, unknown>;
+  category: 'GENERAL' | 'REGISTRATION' | 'NOTIFICATIONS' | 'SECURITY' | 'SYSTEM';
+  description?: string;
+  updatedAt?: string;
+}
+
