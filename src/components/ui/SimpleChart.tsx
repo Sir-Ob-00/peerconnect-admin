@@ -12,27 +12,33 @@ export function BarChart({ data, title, height = 200 }: BarChartProps) {
   return (
     <div className="w-full space-y-3">
       {title && <h3 className="text-sm font-semibold text-slate-800">{title}</h3>}
-      <div className="flex items-end gap-3 w-full border-b border-slate-200 pb-2" style={{ height: `${height}px` }}>
-        {data.map((item, idx) => {
-          const percentage = Math.round((item.value / maxValue) * 100);
-          return (
-            <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative">
-              {/* Tooltip */}
-              <div className="absolute -top-8 bg-slate-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
-                {item.label}: {item.value}
+      {data.length === 0 ? (
+        <div className="flex items-center justify-center border-b border-slate-200 text-xs text-slate-400" style={{ height: `${height}px` }}>
+          No registration trend data available
+        </div>
+      ) : (
+        <div className="flex items-end gap-3 w-full border-b border-slate-200 pb-2" style={{ height: `${height}px` }}>
+          {data.map((item, idx) => {
+            const percentage = Math.round((item.value / maxValue) * 100);
+            return (
+              <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end group relative">
+                {/* Tooltip */}
+                <div className="absolute -top-8 bg-slate-900 text-white text-xs py-1 px-2 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
+                  {item.label}: {item.value}
+                </div>
+                <div className="text-xs font-semibold text-slate-600 mb-1">{item.value}</div>
+                <div
+                  className={`w-full max-w-[40px] rounded-t-md transition-all duration-500 ${item.color || 'bg-brand-600'}`}
+                  style={{ height: `${percentage}%`, minHeight: item.value > 0 ? '4px' : '0' }}
+                />
+                <span className="text-[11px] text-slate-500 mt-2 truncate max-w-full font-medium" title={item.label}>
+                  {item.label}
+                </span>
               </div>
-              <div className="text-xs font-semibold text-slate-600 mb-1">{item.value}</div>
-              <div
-                className={`w-full max-w-[40px] rounded-t-md transition-all duration-500 ${item.color || 'bg-brand-600'}`}
-                style={{ height: `${percentage}%`, minHeight: item.value > 0 ? '4px' : '0' }}
-              />
-              <span className="text-[11px] text-slate-500 mt-2 truncate max-w-full font-medium" title={item.label}>
-                {item.label}
-              </span>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -46,25 +52,31 @@ export function ProgressDistribution({ items, title }: ProgressDistributionProps
   return (
     <div className="w-full space-y-4">
       {title && <h3 className="text-sm font-semibold text-slate-800">{title}</h3>}
-      <div className="space-y-3">
-        {items.map((item, idx) => {
-          const percent = item.total > 0 ? Math.round((item.value / item.total) * 100) : 0;
-          return (
-            <div key={idx} className="space-y-1">
-              <div className="flex justify-between text-xs font-medium text-slate-700">
-                <span>{item.label}</span>
-                <span>{item.value} ({percent}%)</span>
+      {items.length === 0 ? (
+        <div className="py-8 text-center text-xs text-slate-400">
+          No distribution data available
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map((item, idx) => {
+            const percent = item.total > 0 ? Math.round((item.value / item.total) * 100) : 0;
+            return (
+              <div key={idx} className="space-y-1">
+                <div className="flex justify-between text-xs font-medium text-slate-700">
+                  <span>{item.label}</span>
+                  <span>{item.value} ({percent}%)</span>
+                </div>
+                <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all duration-500 ${item.color || 'bg-brand-600'}`}
+                    style={{ width: `${percent}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all duration-500 ${item.color || 'bg-brand-600'}`}
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

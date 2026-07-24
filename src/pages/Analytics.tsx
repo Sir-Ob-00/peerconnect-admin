@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { BarChart, DonutChart, ProgressDistribution } from '../components/ui/SimpleChart';
 import { Card } from '../components/ui/Card';
 import { StatCard } from '../components/ui/StatCard';
-import { useAnalyticsOverview, useUserAnalytics, useSessionAnalytics, useEngagementAnalytics } from '../hooks/useAnalytics';
+import { useAnalyticsOverview, useUserAnalytics, useSessionAnalytics, useEngagementAnalytics, useRegistrationsTrend, useUniversityDistribution } from '../hooks/useAnalytics';
 import { Users, GraduationCap, Calendar, Activity } from 'lucide-react';
 
 export default function Analytics() {
@@ -12,6 +12,8 @@ export default function Analytics() {
   const { data: userAnalytics } = useUserAnalytics();
   const { data: sessionAnalytics } = useSessionAnalytics();
   const { data: engagement } = useEngagementAnalytics();
+  const { data: registrationsData } = useRegistrationsTrend();
+  const { data: universityData } = useUniversityDistribution();
 
   const isLoading = overviewLoading;
 
@@ -34,23 +36,14 @@ export default function Analytics() {
     { label: 'Cancelled', value: sessionAnalytics?.sessionsByStatus?.CANCELLED ?? 15, color: '#ef4444' },
   ];
 
-  const universityDistribution = userAnalytics?.studentsByUniversity?.map((u) => ({
+  const universityDistribution = (universityData || []).map((u) => ({
     label: u.university,
     value: u.count,
     total: totalStudents,
     color: '#0284c7',
-  })) || [
-    { label: 'University of Ghana', value: 55, total: 120, color: '#0284c7' },
-    { label: 'KNUST', value: 40, total: 120, color: '#2563eb' },
-    { label: 'UCC', value: 25, total: 120, color: '#3b82f6' },
-  ];
+  }));
 
-  const registrationTrends = userAnalytics?.registrationsOverTime || [
-    { label: 'Week 1', value: 25 },
-    { label: 'Week 2', value: 38 },
-    { label: 'Week 3', value: 42 },
-    { label: 'Week 4', value: 55 },
-  ];
+  const registrationTrends = registrationsData || [];
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500">

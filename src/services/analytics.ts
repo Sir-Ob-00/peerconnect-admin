@@ -1,5 +1,5 @@
 import { get } from './api';
-import type { AnalyticsOverview, UserAnalytics, SessionAnalytics, EngagementAnalytics } from '../types/api';
+import type { AnalyticsOverview, UserAnalytics, SessionAnalytics, EngagementAnalytics, RegistrationsTrendResponse, UniversityDistributionResponse } from '../types/api';
 
 export async function getAnalyticsOverview() {
   const res = await get<AnalyticsOverview>('/admin/analytics/overview');
@@ -19,4 +19,14 @@ export async function getSessionAnalytics(params?: { startDate?: string; endDate
 export async function getEngagementAnalytics() {
   const res = await get<EngagementAnalytics>('/admin/analytics/engagement');
   return res.data;
+}
+
+export async function getRegistrationsTrend() {
+  const res = await get<RegistrationsTrendResponse>('/admin/analytics/registrations');
+  return res.data.registrations;
+}
+
+export async function getUniversityDistribution() {
+  const res = await get<UniversityDistributionResponse>('/admin/analytics/university-distribution');
+  return res.data.universities;
 }

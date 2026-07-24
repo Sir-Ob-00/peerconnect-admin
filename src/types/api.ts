@@ -566,6 +566,13 @@ export interface AnnouncementItem {
   publishedAt?: string;
 }
 
+export interface RegistrationsTrendResponse {
+  registrations: Array<{ date: string; count: number }>;
+}
+export interface UniversityDistributionResponse {
+  universities: Array<{ university: string; count: number }>;
+}
+
 export interface AuditLogItem {
   id: string;
   action: string;

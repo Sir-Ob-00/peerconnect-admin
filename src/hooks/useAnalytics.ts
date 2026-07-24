@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getAnalyticsOverview, getUserAnalytics, getSessionAnalytics, getEngagementAnalytics } from '../services/analytics';
+import { getAnalyticsOverview, getUserAnalytics, getSessionAnalytics, getEngagementAnalytics, getRegistrationsTrend, getUniversityDistribution } from '../services/analytics';
 
 export function useAnalyticsOverview() {
   return useQuery({
@@ -26,5 +26,19 @@ export function useEngagementAnalytics() {
   return useQuery({
     queryKey: ['engagementAnalytics'],
     queryFn: getEngagementAnalytics,
+  });
+}
+
+export function useRegistrationsTrend() {
+  return useQuery({
+    queryKey: ['registrationsTrend'],
+    queryFn: getRegistrationsTrend,
+  });
+}
+
+export function useUniversityDistribution() {
+  return useQuery({
+    queryKey: ['universityDistribution'],
+    queryFn: getUniversityDistribution,
   });
 }

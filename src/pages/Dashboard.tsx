@@ -1,5 +1,5 @@
 import { useStats } from '../hooks/useStats';
-import { useAnalyticsOverview, useUserAnalytics } from '../hooks/useAnalytics';
+import { useAnalyticsOverview, useRegistrationsTrend, useUniversityDistribution } from '../hooks/useAnalytics';
 import {
   Users, UserCheck, MessageSquare, Star, ArrowRight,
   UserX, ShieldAlert, GraduationCap, Network, Activity, PlusCircle
@@ -14,7 +14,8 @@ import { Link } from 'react-router-dom';
 export default function Dashboard() {
   const { data: stats, isLoading: statsLoading, error: statsError, refetch } = useStats();
   const { data: analytics, isLoading: analyticsLoading } = useAnalyticsOverview();
-  const { data: userAnalytics } = useUserAnalytics();
+  const { data: registrationsData } = useRegistrationsTrend();
+  const { data: universityData } = useUniversityDistribution();
 
   const isLoading = statsLoading || analyticsLoading;
 
@@ -56,26 +57,14 @@ export default function Dashboard() {
     { label: 'Rejected', value: rejectedStudents, color: '#6b7280' },
   ];
 
-  const registrationTrends = userAnalytics?.registrationsOverTime || [
-    { label: 'Mon', value: 12 },
-    { label: 'Tue', value: 18 },
-    { label: 'Wed', value: 25 },
-    { label: 'Thu', value: 22 },
-    { label: 'Fri', value: 30 },
-    { label: 'Sat', value: 15 },
-    { label: 'Sun', value: 20 },
-  ];
+  const registrationTrends = registrationsData || [];
 
-  const universityDistribution = userAnalytics?.studentsByUniversity?.map((u) => ({
+  const universityDistribution = (universityData || []).map((u) => ({
     label: u.university,
     value: u.count,
     total: totalStudents,
     color: '#0284c7',
-  })) || [
-    { label: 'University of Ghana', value: 45, total: 100, color: '#0284c7' },
-    { label: 'KNUST', value: 30, total: 100, color: '#2563eb' },
-    { label: 'UCC', value: 25, total: 100, color: '#3b82f6' },
-  ];
+  }));
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -114,34 +103,34 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions Panel */}
-      <Card className="p-6 bg-slate-900 text-white">
+      <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">Quick Administrative Actions</h2>
-          <span className="text-xs text-slate-400">Shortcut Hub</span>
+          <h2 className="text-lg font-bold text-slate-900">Quick Administrative Actions</h2>
+          <span className="text-xs text-slate-500">Shortcut Hub</span>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <Link to="/verification" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-center transition-colors">
-            <UserCheck className="w-5 h-5 text-brand-400 mx-auto mb-1" />
+          <Link to="/verification" className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-center transition-colors text-slate-700 hover:text-slate-900">
+            <UserCheck className="w-5 h-5 text-brand-600 mx-auto mb-1" />
             <span className="text-xs font-medium block truncate">Pending Students</span>
           </Link>
-          <Link to="/students" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-center transition-colors">
-            <Users className="w-5 h-5 text-blue-400 mx-auto mb-1" />
+          <Link to="/students" className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-center transition-colors text-slate-700 hover:text-slate-900">
+            <Users className="w-5 h-5 text-blue-600 mx-auto mb-1" />
             <span className="text-xs font-medium block truncate">View Students</span>
           </Link>
-          <Link to="/universities" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-center transition-colors">
-            <PlusCircle className="w-5 h-5 text-emerald-400 mx-auto mb-1" />
+          <Link to="/universities" className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-center transition-colors text-slate-700 hover:text-slate-900">
+            <PlusCircle className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
             <span className="text-xs font-medium block truncate">Add University</span>
           </Link>
-          <Link to="/departments" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-center transition-colors">
-            <PlusCircle className="w-5 h-5 text-indigo-400 mx-auto mb-1" />
+          <Link to="/departments" className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-center transition-colors text-slate-700 hover:text-slate-900">
+            <PlusCircle className="w-5 h-5 text-indigo-600 mx-auto mb-1" />
             <span className="text-xs font-medium block truncate">Add Department</span>
           </Link>
-          <Link to="/programmes" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-center transition-colors">
-            <PlusCircle className="w-5 h-5 text-purple-400 mx-auto mb-1" />
+          <Link to="/programmes" className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-center transition-colors text-slate-700 hover:text-slate-900">
+            <PlusCircle className="w-5 h-5 text-purple-600 mx-auto mb-1" />
             <span className="text-xs font-medium block truncate">Add Programme</span>
           </Link>
-          <Link to="/reports" className="p-3 bg-slate-800 hover:bg-slate-700 rounded-lg text-center transition-colors">
-            <ShieldAlert className="w-5 h-5 text-amber-400 mx-auto mb-1" />
+          <Link to="/reports" className="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-lg text-center transition-colors text-slate-700 hover:text-slate-900">
+            <ShieldAlert className="w-5 h-5 text-amber-600 mx-auto mb-1" />
             <span className="text-xs font-medium block truncate">View Reports</span>
           </Link>
         </div>
